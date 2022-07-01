@@ -7,9 +7,9 @@ Befehle zur Umsetzung Ihrer Aufgabe finden Sie in der offiziellen Dokumantation 
 //www.arduino.cc/reference/en/language/functions/analog-io/analogread/
 //www.arduino.cc/reference/en/language/functions/time/delay/
 */
-double val = 0;
-double uin1 = 0;
-double uin2 = 0;
+float val = 0;
+float uin1 = 0;
+float uin2 = 0;
 void setup() {
   // Dieser Teil Ihres Programms wird zu Beginn einmailg ausgeführt
 // Initialisieren Sie eine serielle Kommunikation mit einer Baudrate von 115200
