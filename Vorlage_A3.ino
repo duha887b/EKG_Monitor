@@ -16,15 +16,16 @@ Die Webapp erkennt anhand der geänderten UUID, dass diese einen Zeitstempel ent
 // =============================================================
 // Hilfsvariablen
 // =============================================================
-struct data_structure
+
+union data_structure
 {
-  float uin;
   unsigned long time_stamp;
+  float uin;
 };
+union data_structure myData;
 
-struct data_structure myData;
-
-float val = 0;
+float val = 0.0;
+float help = 0.0;
 
 // Erstellen Sie eine Variable die den analogen Eingangspin des Arduinos definiert
 pin_size_t analogInputPin = A1;
@@ -36,6 +37,7 @@ BLEService HeartRateService("4fafc201-1fb5-459e-8fcc-c5c9c331914b");
 // in dieser erwartet sie eine Characteristic mit Spannungswerten (in micro Volt) mit der UUID:
 // "4fafc201-1cc4-e7c1-c757-f1267dd021e8"
 // Erstellen Sie das BLE Chracteristic Objekt mit der entsprechenden UUID, verwenden Sie den Typ BLEFloatCharacteristic
+BLEUnsignedLongCharacteristic timeStampCharacteristic("4a980baa-1cc4-e7c1-c757-f1267dd021e8", BLERead | BLENotify);
 BLEFloatCharacteristic voltageCharacteristic("4fafc201-1cc4-e7c1-c757-f1267dd021e8", BLERead | BLENotify);
 // Fügen Sie die Characteristic Eigenschaften Read und Notify hinzu
 // Uhr für die Signalabtastung
@@ -61,11 +63,13 @@ BLE.setDeviceName("ECGprojectIBMT");
 // Setzen Sie oben definierten Service als Advertised Service
 BLE.setAdvertisedService(HeartRateService);
 // Fügen Sie dem Service die oben definierte Characteristic hinzu
+HeartRateService.addCharacteristic(timeStampCharacteristic);
 HeartRateService.addCharacteristic(voltageCharacteristic);
 // Fügen sie den definierten Service hinzu
 BLE.addService(HeartRateService);
 // Setzen Sie dem Service einen initalen Wert 0
-voltageCharacteristic.writeValue(myData.uin);
+timeStampCharacteristic.writeValue(0);
+voltageCharacteristic.writeValue(0);
 // Starten Sie das Advertisement
 BLE.advertise();
 
@@ -80,7 +84,7 @@ if (central){
   Serial.println("connected to device");  
 }
 else {
-  if (chrono.hasPassed(100)){
+  if (chrono.hasPassed(1000)){
     chrono.restart();
     Serial.println("no device found");
   }
@@ -93,7 +97,12 @@ while (central.connected()) {
     val = analogRead(analogInputPin);
     myData.time_stamp = millis();
     myData.uin = ((((val/4096)*3.300)-(3.300/2))/1100)*1000*1000;
+    Serial.println(myData.uin);
+    timeStampCharacteristic.writeValue(myData.time_stamp);
     voltageCharacteristic.writeValue(myData.uin);
+    //voltageCharacteristic.readValue(help);
+    //Serial.println(help);
+    //Serial.println(" ");
     }
 }
 }
